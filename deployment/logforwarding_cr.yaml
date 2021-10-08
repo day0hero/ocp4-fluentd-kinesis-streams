@@ -1,0 +1,40 @@
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  outputs:
+    - name: log-forwarding-kinesis-audit
+      url: "tls://log-forwarding-kinesis-audit.openshift-logging.svc:24224"
+      type: fluentdForward
+      secret:
+        name: log-forwarding-kinesis-secure-audit
+    - name: log-forwarding-kinesis-apps
+      url: "tls://log-forwarding-kinesis-apps.openshift-logging.svc:24224"
+      type: fluentdForward
+      secret:
+        name: log-forwarding-kinesis-secure-apps
+    - name: log-forwarding-kinesis-infra
+      url: "tls://log-forwarding-kinesis-infra.openshift-logging.svc:24224"
+      type: fluentdForward
+      secret:
+        name: log-forwarding-kinesis-secure-infra
+  pipelines:
+    - name: audit-logs
+      inputRefs:
+        - audit
+      outputRefs:
+        - log-forwarding-kinesis-audit
+    - name: application-logs
+      inputRefs:
+        - application
+      outputRefs:
+        - default
+        - log-forwarding-kinesis-apps
+    - name: infrastructure-logs
+      inputRefs:
+        - infrastructure
+      outputRefs:
+        - default
+        - log-forwarding-kinesis-infra
